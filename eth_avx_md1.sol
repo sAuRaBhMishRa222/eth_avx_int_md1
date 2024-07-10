@@ -1,38 +1,31 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-contract errorhandling{
+contract Auction {
     address public owner;
-    string public owner_name="Saurabh Mishra";
-    uint public total_balance=0;
-
-    mapping (address=>uint) public balances;
+    uint public highestBid;
+    address public highestBidder;
 
     constructor() {
-        owner=msg.sender;
+        owner = msg.sender;
+        highestBid = 0;
     }
 
-    function credit(address _address, uint _amount) public {
-        require(msg.sender==owner,"Only Owner has access to it...!!!!");
-        total_balance+= _amount;
-        balances[_address]+= _amount;
+    function bid(uint _amount) public {
+        require(_amount > highestBid, "Bid must be higher than the current highest bid");
+        highestBid = _amount;
+        highestBidder = msg.sender;
+    }
 
-        assert(total_balance >= balances[_address]);
-    } 
+    function getHighestBid() public view returns (uint) {
+        assert(highestBid >= 0); 
+        return highestBid;
+    }
 
-    function debit(address _address, uint _amount) public {
-        require(msg.sender==owner,"Only Owner has access to it...!!!!");
-        if(balances[_address]<_amount){
-            revert("Balance is Insufficient");
+    function withdraw() public {
+        if (msg.sender != highestBidder) {
+            revert("Only the highest bidder can withdraw");
         }
-        total_balance-= _amount;
-        balances[_address]-= _amount;
-
-        assert(total_balance >= 0);
+        payable(msg.sender).transfer(highestBid);
     }
-
-    function get_balance(address _address) public view returns(uint ){
-        assert(msg.sender==owner);
-        return balances[_address];
-    } 
 }
