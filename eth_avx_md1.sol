@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-contract Auction {
+contract Auction{
     address public owner;
     uint public highestBid;
-    address public highestBidder;
+    address public  highestBidder;
 
     constructor() {
         owner = msg.sender;
@@ -22,10 +22,15 @@ contract Auction {
         return highestBid;
     }
 
-    function withdraw() public {
-        if (msg.sender != highestBidder) {
-            revert("Only the highest bidder can withdraw");
-        }
-        payable(msg.sender).transfer(highestBid);
+    function cancelAuction() public {
+    if (msg.sender != owner) {
+        revert("Only the auction owner can cancel the auction");
     }
+    if (highestBid > 0) {
+        revert("Auction cannot be canceled after bidding has started");
+    }
+    // // Reset auction state
+    highestBid = 0;
+    highestBidder = payable(address(0));
+}
 }
